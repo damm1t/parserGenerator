@@ -2,7 +2,12 @@ import java.io.File
 import java.io.PrintWriter
 import java.lang.AssertionError
 
-class Generator internal constructor(private val grammar: Grammar, private val name: String, private val header: String, private val members: String) {
+class Generator internal constructor(
+    private val grammar: Grammar,
+    private val name: String,
+    private val header: String,
+    private val members: String
+) {
     private val directory = "src/generated/${name.toLowerCase()}"
     private val packageString = "package generated.${name.toLowerCase()};"
 
@@ -17,7 +22,7 @@ class Generator internal constructor(private val grammar: Grammar, private val n
         generateMain()
     }
 
-    internal fun generateToken() {
+    private fun generateToken() {
         val tokenName = "${name}Token"
         val file = File(directory, "$tokenName.java")
         PrintWriter(file).use { out ->
@@ -35,11 +40,12 @@ class Generator internal constructor(private val grammar: Grammar, private val n
         }
     }
 
-    internal fun generateLexer() {
+    private fun generateLexer() {
         val lexerName = "${name}Lexer"
         val file = File(directory, "$lexerName.java")
         PrintWriter(file).use { out ->
-            out.println("""
+            out.println(
+                """
             $packageString
             // imports
             import java.io.IOException;
@@ -92,7 +98,8 @@ class Generator internal constructor(private val grammar: Grammar, private val n
                     while (curToken == ${name}Token.END) {
                         curString = curString.concat(Character.toString((char)curChar));
                             switch (curString) {
-            """.trimIndent())
+            """.trimIndent()
+            )
             // printing all terminals as switch cases
             // if one matches, read next char and write the corresponding token to curToken
             for (terminal in grammar.terminals.values) {
@@ -115,7 +122,8 @@ class Generator internal constructor(private val grammar: Grammar, private val n
                 }
             }
             // we went all the way to the eof and could not determine char sequence
-            out.println("""if ((curChar == -1 || isBlank(curChar)) && prev == ${name}Token.END) {
+            out.println(
+                """if ((curChar == -1 || isBlank(curChar)) && prev == ${name}Token.END) {
                                     throw new ParseException("Illegal character " + curString.charAt(0) + " at position ", curPos - curString.length());
                                 }
                             }
@@ -147,16 +155,38 @@ class Generator internal constructor(private val grammar: Grammar, private val n
                     return curString;
                 }
             }
-            """.trimIndent())
+            """.trimIndent()
+            )
         }
     }
 
-    internal fun generateParser() {
+    private fun generateParser() {
         val parserName = "${name}Parser"
         val lexerName = "${name}Lexer"
         val file = File(directory, "$parserName.java")
         PrintWriter(file).use { out ->
-            out.println(packageString)
+
+            out.println(
+                """
+            $packageString
+            $header
+            import java.io.InputStream;
+            import java.text.ParseException;
+            
+            //class header
+            public class $parserName {
+                // user-defined members
+                $members
+                // members
+                private ${lexerName} lex;
+                
+                // main func, return type same as starting nonterm
+                public ${grammar.start.returnType()} parse(InputStream input) throws ParseException {
+                    lex = new $lexerName(input);
+                    lex.nextToken();
+            """.trimIndent()
+            )
+            /*out.println(packageString)
             // user-defined imports
             out.println(header)
             // imports
@@ -172,6 +202,7 @@ class Generator internal constructor(private val grammar: Grammar, private val n
             out.println("\tpublic ${grammar.start.returnType()} parse(InputStream input) throws ParseException {")
             out.println("\t\tlex = new $lexerName(input);")
             out.println("\t\tlex.nextToken();")
+            */
             out.print("\t\t")
             if (grammar.start.returnType() != "void") out.print("return ")
             out.println("${grammar.start.name}();")
@@ -196,7 +227,11 @@ class Generator internal constructor(private val grammar: Grammar, private val n
                 out.println(nonTerminal.init)
                 // declare return val
                 if (nonTerminal.returnType() != "void")
-                    out.println("\t\t${nonTerminal.returnType()} ${nonTerminal.returnAttribute.name} = ${defaultValue(nonTerminal.returnType())};")
+                    out.println(
+                        "\t\t${nonTerminal.returnType()} ${nonTerminal.returnAttribute.name} = ${defaultValue(
+                            nonTerminal.returnType()
+                        )};"
+                    )
 
                 // here start the rules
                 out.println("\t\tswitch (lex.getCurToken()) {")
@@ -235,9 +270,9 @@ class Generator internal constructor(private val grammar: Grammar, private val n
                 }
 
                 out.print(
-                        "\t\t\tdefault:\n" +
-                                "\t\t\t\tthrow new IllegalArgumentException(\"Unexpected token \" + lex.getCurString() + \" at position: \" + (lex.getCurPos() - 1));\n" +
-                                "\t\t}\n"
+                    "\t\t\tdefault:\n" +
+                            "\t\t\t\tthrow new IllegalArgumentException(\"Unexpected token \" + lex.getCurString() + \" at position: \" + (lex.getCurPos() - 1));\n" +
+                            "\t\t}\n"
                 )
                 if (nonTerminal.returnType() != "void") {
                     out.println("\t\treturn ${nonTerminal.returnAttribute.name};")
@@ -249,18 +284,24 @@ class Generator internal constructor(private val grammar: Grammar, private val n
         }
     }
 
-    internal fun generateMain() {
+    private fun generateMain() {
         val returnsVoid = grammar.start.returnType() == "void"
         val file = File(directory, "Main.java")
         PrintWriter(file).use { out ->
-            out.println(packageString)
-            out.println("import java.io.*;")
-            out.println("import java.text.ParseException;")
-            out.println("import java.nio.charset.StandardCharsets;")
+
+            out.println(
+                """
+            $packageString
+            import java.io.*;
+            import java.text.ParseException;
+            import java.nio.charset.StandardCharsets;
             // Main class
-            out.println("\npublic class Main {")
-            out.println("\tpublic static void main(String[] args) {")
-            out.println("\t\t${name}Parser parser = new ${name}Parser();")
+             
+            public class Main {
+                public static void main(String[] args) {
+                    ${name}Parser parser = new ${name}Parser();
+            """.trimIndent()
+            )
             if (!returnsVoid) {
                 out.println("\t\t${grammar.start.returnType()} res;")
             }
@@ -286,17 +327,21 @@ class Generator internal constructor(private val grammar: Grammar, private val n
             } else {
                 out.println("\t\t\t\t\tparser.parse(input);")
             }
-            out.println("\t\t\t\t} catch (FileNotFoundException e) {")
-            out.println("\t\t\t\t\tSystem.err.println(e.getMessage());")
-            out.println("\t\t\t\t\tSystem.exit(1);")
-            out.println("\t\t\t\t}")
-            out.println("\t\t\t}")
-            out.println("\t\t} catch (ParseException e) {")
-            out.println("\t\t\tSystem.err.println(\"Parser failed: \\nCause: \" + e.getMessage() + e.getErrorOffset());")
-            out.println("\t\t\tSystem.exit(1);")
-            out.println("\t\t}")
-            out.println("\t}")
-            out.print("}")
+            out.println(
+                """
+                            } catch (FileNotFoundException e) {
+                                System.err.println(e.getMessage());
+                                System.exit(1);
+                            }
+                        }
+                    } catch (ParseException e) {
+                        System.err.println("Parser failed: \nCause: " + e.getMessage() + e.getErrorOffset());
+                        System.exit(1);
+                    }
+                }
+            }
+            """.trimIndent()
+            )
         }
     }
 
