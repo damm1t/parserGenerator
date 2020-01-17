@@ -3,20 +3,30 @@ package generated.arithmetic;
 import java.io.InputStream;
 import java.text.ParseException;
 
+//class header
 public class ArithmeticParser {
-
-	private ArithmeticLexer lex;
-
-	public int parse(InputStream input) throws ParseException {
-		lex = new ArithmeticLexer(input);
-		lex.nextToken();
+    // user-defined members
+    
+    // members
+    private ArithmeticLexer lex;
+    
+    // main func, return type same as starting nonterm
+    public int parse(InputStream input) throws ParseException {
+        lex = new ArithmeticLexer(input);
+        lex.nextToken();
 		return add();
 	}
 
 	private int add() throws ParseException {
 
-		int val = 0;
+		int val;
 		switch (lex.getCurToken()) {
+			case NUM: {
+				int mul = mul();
+
+				val = add_(mul);
+				break;
+			}
 			case TERM0: {
 				int mul = mul();
 				
@@ -24,15 +34,8 @@ public class ArithmeticParser {
 				val = add_;
 				break;
 			}
-			case NUM: {
-				int mul = mul();
-				
-				int add_ = add_(mul);
-				val = add_;
-				break;
-			}
 			default:
-				throw new AssertionError();
+				throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 		}
 		return val;
 	}
@@ -42,7 +45,8 @@ public class ArithmeticParser {
 		switch (lex.getCurToken()) {
 			case ADD: {
 
-				assert lex.getCurToken() != ArithmeticToken.ADD;
+				if (lex.getCurToken() != ArithmeticToken.ADD)
+					throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 				lex.nextToken();
 				int mul = mul();
 				int res = acc + mul;
@@ -54,9 +58,18 @@ public class ArithmeticParser {
 val = acc;
 				break;
 			}
+			case TERM1: {
+val = acc;
+				break;
+			}
+			case END: {
+val = acc;
+				break;
+			}
 			case MINUS: {
 
-				assert lex.getCurToken() != ArithmeticToken.MINUS;
+				if (lex.getCurToken() != ArithmeticToken.MINUS)
+					throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 				lex.nextToken();
 				int mul = mul();
 				int res = acc - mul;
@@ -64,16 +77,8 @@ val = acc;
 				val = add_;
 				break;
 			}
-			case TERM1: {
-val = acc;
-				break;
-			}
-			case END: {
-val = acc;
-				break;
-			}
 			default:
-				throw new AssertionError();
+				throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 		}
 		return val;
 	}
@@ -81,21 +86,10 @@ val = acc;
 
 		int val = 0;
 		switch (lex.getCurToken()) {
-			case ADD: {
-val = 1;
-				break;
-			}
-			case EPS: {
-val = 1;
-				break;
-			}
-			case MINUS: {
-val = 1;
-				break;
-			}
 			case POW: {
 
-				assert lex.getCurToken() != ArithmeticToken.POW;
+				if (lex.getCurToken() != ArithmeticToken.POW)
+					throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 				lex.nextToken();
 				int term = term();
 				
@@ -103,7 +97,15 @@ val = 1;
 				val = (int)Math.pow(term, pow_);
 				break;
 			}
-			case MUL: {
+			case DIV: {
+val = 1;
+				break;
+			}
+			case ADD: {
+val = 1;
+				break;
+			}
+			case EPS: {
 val = 1;
 				break;
 			}
@@ -115,12 +117,16 @@ val = 1;
 val = 1;
 				break;
 			}
-			case DIV: {
+			case MINUS: {
+val = 1;
+				break;
+			}
+			case MUL: {
 val = 1;
 				break;
 			}
 			default:
-				throw new AssertionError();
+				throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 		}
 		return val;
 	}
@@ -128,13 +134,6 @@ val = 1;
 
 		int val = 0;
 		switch (lex.getCurToken()) {
-			case TERM0: {
-				int pow = pow();
-				
-				int mul_ = mul_(pow);
-				val = mul_;
-				break;
-			}
 			case NUM: {
 				int pow = pow();
 				
@@ -142,8 +141,15 @@ val = 1;
 				val = mul_;
 				break;
 			}
+			case TERM0: {
+				int pow = pow();
+				
+				int mul_ = mul_(pow);
+				val = mul_;
+				break;
+			}
 			default:
-				throw new AssertionError();
+				throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 		}
 		return val;
 	}
@@ -151,26 +157,23 @@ val = 1;
 
 		int val = 0;
 		switch (lex.getCurToken()) {
+			case DIV: {
+
+				if (lex.getCurToken() != ArithmeticToken.DIV)
+					throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
+				lex.nextToken();
+				int pow = pow();
+				int res = acc / pow;
+				int mul_ = mul_(res);
+				val = mul_;
+				break;
+			}
 			case ADD: {
 val = acc;
 				break;
 			}
 			case EPS: {
 val = acc;
-				break;
-			}
-			case MINUS: {
-val = acc;
-				break;
-			}
-			case MUL: {
-
-				assert lex.getCurToken() != ArithmeticToken.MUL;
-				lex.nextToken();
-				int pow = pow();
-				int res = acc * pow;
-				int mul_ = mul_(res);
-				val = mul_;
 				break;
 			}
 			case TERM1: {
@@ -181,18 +184,23 @@ val = acc;
 val = acc;
 				break;
 			}
-			case DIV: {
+			case MINUS: {
+val = acc;
+				break;
+			}
+			case MUL: {
 
-				assert lex.getCurToken() != ArithmeticToken.DIV;
+				if (lex.getCurToken() != ArithmeticToken.MUL)
+					throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 				lex.nextToken();
 				int pow = pow();
-				int res = acc / pow;
+				int res = acc * pow;
 				int mul_ = mul_(res);
 				val = mul_;
 				break;
 			}
 			default:
-				throw new AssertionError();
+				throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 		}
 		return val;
 	}
@@ -200,13 +208,6 @@ val = acc;
 
 		int val = 0;
 		switch (lex.getCurToken()) {
-			case TERM0: {
-				int term = term();
-				
-				int pow_ = pow_();
-				val = (int)Math.pow(term, pow_);
-				break;
-			}
 			case NUM: {
 				int term = term();
 				
@@ -214,8 +215,15 @@ val = acc;
 				val = (int)Math.pow(term, pow_);
 				break;
 			}
+			case TERM0: {
+				int term = term();
+				
+				int pow_ = pow_();
+				val = (int)Math.pow(term, pow_);
+				break;
+			}
 			default:
-				throw new AssertionError();
+				throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 		}
 		return val;
 	}
@@ -223,25 +231,28 @@ val = acc;
 
 		int val = 0;
 		switch (lex.getCurToken()) {
+			case NUM: {
+val = Integer.parseInt(lex.getCurString());
+				if (lex.getCurToken() != ArithmeticToken.NUM)
+					throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
+				lex.nextToken();
+				break;
+			}
 			case TERM0: {
 
-				assert lex.getCurToken() != ArithmeticToken.TERM0;
+				if (lex.getCurToken() != ArithmeticToken.TERM0)
+					throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 				lex.nextToken();
 				int add = add();
 				
 val = add;
-				assert lex.getCurToken() != ArithmeticToken.TERM1;
-				lex.nextToken();
-				break;
-			}
-			case NUM: {
-val = Integer.parseInt(lex.getCurString());
-				assert lex.getCurToken() != ArithmeticToken.NUM;
+				if (lex.getCurToken() != ArithmeticToken.TERM1)
+					throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 				lex.nextToken();
 				break;
 			}
 			default:
-				throw new AssertionError();
+				throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 		}
 		return val;
 	}

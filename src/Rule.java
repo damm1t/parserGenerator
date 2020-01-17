@@ -40,7 +40,7 @@ public class Rule {
         Unit(Element element, String code, List<String> args) {
             this.element = element;
             if (code != null)
-                this.code = code/*.substring(1, code.length() - 1)*/;
+                this.code = code;
             if (args != null)
                 this.args = args;
         }

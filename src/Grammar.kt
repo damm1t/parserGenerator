@@ -1,7 +1,11 @@
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
-class Grammar(val terminals: MutableMap<String, Terminal>, val nonTerminals: MutableMap<String, NonTerminal>, val start: NonTerminal) {
+class Grammar(
+    val terminals: MutableMap<String, Terminal>,
+    val nonTerminals: MutableMap<String, NonTerminal>,
+    val start: NonTerminal
+) {
     val EPS = Terminal("EPS")
     val END = Terminal("END")
 
@@ -17,7 +21,10 @@ class Grammar(val terminals: MutableMap<String, Terminal>, val nonTerminals: Mut
                 for (terminal in terminals.values) {
                     for (rule in nonTerminal.rules) {
                         if (first[rule.head().name]!!.contains(terminal.name)
-                                || first[rule.head().name]!!.contains(EPS.name) && follow[nonTerminal.name]!!.contains(terminal.name)) {
+                            || first[rule.head().name]!!.contains(EPS.name) && follow[nonTerminal.name]!!.contains(
+                                terminal.name
+                            )
+                        ) {
                             row[terminal] = rule
                         }
                     }
@@ -65,7 +72,6 @@ class Grammar(val terminals: MutableMap<String, Terminal>, val nonTerminals: Mut
                             break
                         }
                     }
-
                 }
             }
         } while (changed)
@@ -109,48 +115,48 @@ class Grammar(val terminals: MutableMap<String, Terminal>, val nonTerminals: Mut
     }
 
     override fun toString(): String {
-        val sb = StringBuilder()
-        sb.append("Start: ").append(start.name).append('\n')
-        sb.append("\nNonTerms:\n")
+        val res = StringBuilder()
+        res.append("Start: ").append(start.name).append('\n')
+        res.append("\nNonTerms:\n")
         nonTerminals.forEach { (name, elem) ->
-            sb.append(name).append('\n')
+            res.append(name).append('\n')
             if (elem.rules.isNotEmpty()) {
-                sb.append("\t: ").append(elem.rules[0]).append('\n')
+                res.append("\t: ").append(elem.rules[0]).append('\n')
             }
             for (i in 1 until elem.rules.size) {
-                sb.append("\t| ").append(elem.rules[i]).append('\n')
+                res.append("\t| ").append(elem.rules[i]).append('\n')
             }
-            sb.append(";\n")
+            res.append(";\n")
         }
-        sb.append("\nTerms:\n")
+        res.append("\nTerms:\n")
         terminals.forEach { (name, elem) ->
-            sb.append(name).append('\n')
+            res.append(name).append('\n')
             if (elem.strings.isNotEmpty()) {
-                sb.append("\t: ").append(elem.strings[0])
+                res.append("\t: ").append(elem.strings[0])
             }
             for (i in 1 until elem.strings.size) {
-                sb.append(" | ").append(elem.strings[i])
+                res.append(" | ").append(elem.strings[i])
             }
             if (elem.regex.isNotEmpty()) {
                 if (elem.strings.isEmpty()) {
-                    sb.append("\t: ").append(elem.regex[0])
+                    res.append("\t: ").append(elem.regex[0])
                 } else {
-                    sb.append("\n\t| ").append(elem.regex[0])
+                    res.append("\n\t| ").append(elem.regex[0])
                 }
             }
             for (i in 1 until elem.regex.size) {
-                sb.append(" | ").append(elem.regex[i])
+                res.append(" | ").append(elem.regex[i])
             }
-            sb.append(";\n")
+            res.append(";\n")
         }
-        sb.append("\nFirst:\n")
+        res.append("\nFirst:\n")
         first.forEach { (k, v) ->
             if (nonTerminals.containsKey(k)) {
-                sb.append(k).append(" : ").append(v).append('\n')
+                res.append(k).append(" : ").append(v).append('\n')
             }
         }
-        sb.append("\nFollow:\n")
-        follow.forEach { (k, v) -> sb.append(k).append(" : ").append(v).append('\n') }
-        return sb.toString()
+        res.append("\nFollow:\n")
+        follow.forEach { (k, v) -> res.append(k).append(" : ").append(v).append('\n') }
+        return res.toString()
     }
 }

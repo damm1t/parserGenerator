@@ -1,12 +1,12 @@
 package generated.arithmetic;
-
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-
+import java.nio.charset.StandardCharsets;
+// Main class
+ 
 public class Main {
-	public static void main(String[] args) {
-		ArithmeticParser parser = new ArithmeticParser();
+    public static void main(String[] args) {
+        ArithmeticParser parser = new ArithmeticParser();
 		int res;
 		try {
 			if (args.length != 0) {
@@ -22,14 +22,14 @@ public class Main {
 					InputStream input = new FileInputStream(new File("inputs/arithmetic_input.txt"));
 					res = parser.parse(input);
 					System.out.println(res);
-				} catch (FileNotFoundException e) {
-					System.err.println(e.getMessage());
-					System.exit(1);
-				}
-			}
-		} catch (ParseException e) {
-			System.err.println("Parser failed: \nCause: " + e.getMessage() + e.getErrorOffset());
-			System.exit(1);
-		}
-	}
+                } catch (FileNotFoundException e) {
+                    System.err.println(e.getMessage());
+                    System.exit(1);
+                }
+            }
+        } catch (ParseException e) {
+            System.err.println("Parser failed: \nCause: " + e.getMessage() + e.getErrorOffset());
+            System.exit(1);
+        }
+    }
 }

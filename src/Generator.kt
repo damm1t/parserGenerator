@@ -186,23 +186,6 @@ class Generator internal constructor(
                     lex.nextToken();
             """.trimIndent()
             )
-            /*out.println(packageString)
-            // user-defined imports
-            out.println(header)
-            // imports
-            out.println("import java.io.InputStream;")
-            out.println("import java.text.ParseException;\n")
-            // class header
-            out.println("public class $parserName {")
-            // user-defined members
-            out.println(members)
-            // members
-            out.println("\tprivate $lexerName lex;\n")
-            // main func, return type same as starting nonterm
-            out.println("\tpublic ${grammar.start.returnType()} parse(InputStream input) throws ParseException {")
-            out.println("\t\tlex = new $lexerName(input);")
-            out.println("\t\tlex.nextToken();")
-            */
             out.print("\t\t")
             if (grammar.start.returnType() != "void") out.print("return ")
             out.println("${grammar.start.name}();")
