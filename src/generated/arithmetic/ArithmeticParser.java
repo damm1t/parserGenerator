@@ -19,12 +19,13 @@ public class ArithmeticParser {
 
 	private int add() throws ParseException {
 
-		int val;
+		int val = 0;
 		switch (lex.getCurToken()) {
 			case NUM: {
 				int mul = mul();
-
-				val = add_(mul);
+				
+				int add_ = add_(mul);
+				val = add_;
 				break;
 			}
 			case TERM0: {

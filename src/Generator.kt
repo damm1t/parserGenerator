@@ -97,7 +97,7 @@ class Generator internal constructor(
                     // greedily reading forward to be able to match string tokens
                     while (curToken == ${name}Token.END) {
                         curString = curString.concat(Character.toString((char)curChar));
-                            switch (curString) {
+                        switch (curString) {
             """.trimIndent()
             )
             // printing all terminals as switch cases
@@ -123,38 +123,38 @@ class Generator internal constructor(
             }
             // we went all the way to the eof and could not determine char sequence
             out.println(
-                """if ((curChar == -1 || isBlank(curChar)) && prev == ${name}Token.END) {
-                                    throw new ParseException("Illegal character " + curString.charAt(0) + " at position ", curPos - curString.length());
-                                }
-                            }
-                        // confusing schemes to check if we need to continue reading
-                        if (curToken == ${name}Token.END) {
-                            if (prev != ${name}Token.END) {
-                                curString = curString.substring(0, curString.length() - 1);
-                                curToken = prev;
-                            } else {
-                                nextChar();
-                            }
-                        } else {
-                            prev = curToken;
-                            curToken = ${name}Token.END;
-                        }
+            """if ((curChar == -1 || isBlank(curChar)) && prev == ${name}Token.END) {
+                        throw new ParseException("Illegal character " + curString.charAt(0) + " at position ", curPos - curString.length());
                     }
-                }
-                // some useless getters
-                
-                ${name}Token getCurToken() {
-                    return curToken;
-                }
-
-                int getCurPos() {
-                    return curPos;
-                }
-
-                String getCurString() {
-                    return curString;
-                }
             }
+            // confusing schemes to check if we need to continue reading
+            if (curToken == ${name}Token.END) {
+                if (prev != ${name}Token.END) {
+                    curString = curString.substring(0, curString.length() - 1);
+                    curToken = prev;
+                } else {
+                    nextChar();
+                }
+            } else {
+                prev = curToken;
+                curToken = ${name}Token.END;
+            }
+        }
+    }
+    // some useless getters
+                
+    ${name}Token getCurToken() {
+        return curToken;
+    }
+
+    int getCurPos() {
+        return curPos;
+    }
+
+    String getCurString() {
+        return curString;
+    }
+}
             """.trimIndent()
             )
         }

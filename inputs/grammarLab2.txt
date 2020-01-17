@@ -1,0 +1,43 @@
+grammar Lab2
+
+or
+    : xor or_
+    ;
+
+or_
+    : OR xor or_
+    | EPS
+    ;
+
+xor
+    : and xor_
+    ;
+
+xor_
+    : XOR and xor_
+    | EPS
+    ;
+
+and
+    : term and_
+    ;
+
+and_
+    : AND term and_
+    | EPS
+    ;
+
+
+term : NOT term
+    | NUM
+    | LPAR or RPAR;
+
+NOT : '!';
+AND : '&';
+OR : '|';
+XOR : '^';
+
+LPAR : '(';
+RPAR : ')';
+
+NUM : /[a-z]+/ ;

@@ -2,7 +2,7 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 
 fun main(args: Array<String>) {
-    val lexer = NewGrammarLexer(CharStreams.fromFileName("inputs/grammarArithmetic.txt"))
+    val lexer = NewGrammarLexer(CharStreams.fromFileName("inputs/grammarLab2.txt"))
     val parser = NewGrammarParser(CommonTokenStream(lexer))
     val ctx = parser.start()
 
