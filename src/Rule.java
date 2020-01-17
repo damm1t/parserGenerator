@@ -28,7 +28,7 @@ public class Rule {
         return sb.toString();
     }
 
-    class Unit {
+    static class Unit {
         Element element;
         String code = "";
         List<String> args = new ArrayList<>();

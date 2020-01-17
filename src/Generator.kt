@@ -39,48 +39,60 @@ class Generator internal constructor(private val grammar: Grammar, private val n
         val lexerName = "${name}Lexer"
         val file = File(directory, "$lexerName.java")
         PrintWriter(file).use { out ->
-            out.println(packageString)
+            out.println("""
+            $packageString
             // imports
-            out.println("import java.io.IOException;")
-            out.println("import java.io.InputStream;")
-            out.println("import java.text.ParseException;\n")
-
-            out.println("class $lexerName {")
+            import java.io.IOException;
+            import java.io.InputStream;
+            import java.text.ParseException;
+            
             // fields
-            out.println("\tprivate InputStream input;")
-            out.println("\tprivate int curChar, curPos;")
-            out.println("\tprivate String curString;")
-            out.println("\tprivate ${name}Token curToken;\n")
-            // constructor
-            out.println("\t$lexerName(InputStream input) throws ParseException {")
-            out.println("\t\tthis.input = input;")
-            out.println("\t\tcurPos = 0;")
-            out.println("\t\tnextChar();")
-            out.println("\t}\n")
-            // isBlank
-            out.println("\tprivate boolean isBlank(int c) {\n\t\treturn Character.isWhitespace(c);\n\t}\n")
-            // nextChar
-            out.println("\tprivate void nextChar() throws ParseException {")
-            out.println("\t\tcurPos++;")
-            out.println("\t\ttry {")
-            out.println("\t\t\tcurChar = input.read();")
-            out.println("\t\t} catch (IOException e) {")
-            out.println("\t\t\tthrow new ParseException(e.getMessage(), curPos);")
-            out.println("\t\t}")
-            out.println("\t}\n")
-            // nextToken
-            out.println("\tvoid nextToken() throws ParseException {")
-            // skipping blanks
-            out.println("\t\twhile (isBlank(curChar)) {\n\t\t\tnextChar();\n\t\t}")
-            // if EOF found return END token
-            out.println("\t\tif (curChar == -1) {\n\t\t\tcurToken = ${name}Token.END;\n\t\t\treturn;\n\t\t}\n")
-            out.println("\t\tcurString = \"\";")
-            out.println("\t\tcurToken = ${name}Token.END;")
-            out.println("\t\t${name}Token prev = ${name}Token.END;")
-            // greedily reading forward to be able to match string tokens
-            out.println("\t\twhile (curToken == ${name}Token.END) {")
-            out.println("\t\t\tcurString = curString.concat(Character.toString((char)curChar));")
-            out.println("\t\t\tswitch (curString) {")
+            class $lexerName {
+                private InputStream input;
+                private int curChar, curPos;
+                private String curString;
+                private ${name}Token curToken;
+                // constructor
+                $lexerName (InputStream input) throws ParseException {
+                    this.input = input;
+                    curPos = 0;
+                    nextChar();
+                }
+                
+                // isBlank
+                private boolean isBlank(int c) {
+                    return Character.isWhitespace(c);
+                }
+                
+                // nextChar
+                private void nextChar() throws ParseException {
+                    curPos++;
+                    try {
+                        curChar = input.read();
+                    } catch (IOException e) {
+                        throw new ParseException(e.getMessage(), curPos);
+                    }
+                }
+                // nextToken
+                void nextToken() throws ParseException {
+                    // skipping blanks
+                    while (isBlank(curChar)) {
+                        nextChar();
+                    }
+                    // if EOF found return END token
+                    if (curChar == -1) {
+                        curToken = ${name}Token.END;
+                        return;
+                    }
+                    
+                    curString = "";
+                    curToken = ${name}Token.END;
+                    ${name}Token prev = ${name}Token.END;
+                    // greedily reading forward to be able to match string tokens
+                    while (curToken == ${name}Token.END) {
+                        curString = curString.concat(Character.toString((char)curChar));
+                            switch (curString) {
+            """.trimIndent())
             // printing all terminals as switch cases
             // if one matches, read next char and write the corresponding token to curToken
             for (terminal in grammar.terminals.values) {
@@ -103,40 +115,39 @@ class Generator internal constructor(private val grammar: Grammar, private val n
                 }
             }
             // we went all the way to the eof and could not determine char sequence
-            out.println("if ((curChar == -1 || isBlank(curChar)) && prev == ${name}Token.END) {")
-            out.println("\t\t\t\t\t\tthrow new ParseException(\"Illegal character '\" + curString.charAt(0) + \"' at position \", curPos - curString.length());")
-            out.println("\t\t\t\t\t}")
-            out.println("\t\t\t}")
-            // confusing schemes to check if we need to continue reading
-            out.println("\t\t\tif (curToken == ${name}Token.END) {")
-            out.println("\t\t\t\tif (prev != ${name}Token.END) {")
-            out.println("\t\t\t\t\tcurString = curString.substring(0, curString.length() - 1);")
-            out.println("\t\t\t\t\tcurToken = prev;")
-            out.println("\t\t\t\t} else {")
-            out.println("\t\t\t\t\tnextChar();")
-            out.println("\t\t\t\t}")
+            out.println("""if ((curChar == -1 || isBlank(curChar)) && prev == ${name}Token.END) {
+                                    throw new ParseException("Illegal character " + curString.charAt(0) + " at position ", curPos - curString.length());
+                                }
+                            }
+                        // confusing schemes to check if we need to continue reading
+                        if (curToken == ${name}Token.END) {
+                            if (prev != ${name}Token.END) {
+                                curString = curString.substring(0, curString.length() - 1);
+                                curToken = prev;
+                            } else {
+                                nextChar();
+                            }
+                        } else {
+                            prev = curToken;
+                            curToken = ${name}Token.END;
+                        }
+                    }
+                }
+                // some useless getters
+                
+                ${name}Token getCurToken() {
+                    return curToken;
+                }
 
-            out.println("\t\t\t} else {")
-            out.println("\t\t\t\tprev = curToken;")
-            out.println("\t\t\t\tcurToken = ${name}Token.END;")
-            out.println("\t\t\t}")
-            out.println("\t\t}")
-            out.println("\t}")
+                int getCurPos() {
+                    return curPos;
+                }
 
-            // some useless getters
-            out.println("\n\t${name}Token getCurToken() {")
-            out.println("\t\treturn curToken;")
-            out.println("\t}")
-
-            out.println("\n\tint getCurPos() {")
-            out.println("\t\treturn curPos;")
-            out.println("\t}")
-
-            out.println("\n\tString getCurString() {")
-            out.println("\t\treturn curString;")
-            out.println("\t}")
-
-            out.println("}")
+                String getCurString() {
+                    return curString;
+                }
+            }
+            """.trimIndent())
         }
     }
 

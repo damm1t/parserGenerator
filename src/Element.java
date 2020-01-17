@@ -24,7 +24,7 @@ public class Element {
         return returnAttribute.type;
     }
 
-    class Attribute {
+    static class Attribute {
         String type, name;
 
         private Attribute() {

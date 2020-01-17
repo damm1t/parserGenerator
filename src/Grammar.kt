@@ -112,9 +112,9 @@ class Grammar(val terminals: MutableMap<String, Terminal>, val nonTerminals: Mut
         val sb = StringBuilder()
         sb.append("Start: ").append(start.name).append('\n')
         sb.append("\nNonTerms:\n")
-        nonTerminals.forEach { name, elem ->
+        nonTerminals.forEach { (name, elem) ->
             sb.append(name).append('\n')
-            if (!elem.rules.isEmpty()) {
+            if (elem.rules.isNotEmpty()) {
                 sb.append("\t: ").append(elem.rules[0]).append('\n')
             }
             for (i in 1 until elem.rules.size) {
@@ -123,15 +123,15 @@ class Grammar(val terminals: MutableMap<String, Terminal>, val nonTerminals: Mut
             sb.append(";\n")
         }
         sb.append("\nTerms:\n")
-        terminals.forEach { name, elem ->
+        terminals.forEach { (name, elem) ->
             sb.append(name).append('\n')
-            if (!elem.strings.isEmpty()) {
+            if (elem.strings.isNotEmpty()) {
                 sb.append("\t: ").append(elem.strings[0])
             }
             for (i in 1 until elem.strings.size) {
                 sb.append(" | ").append(elem.strings[i])
             }
-            if (!elem.regex.isEmpty()) {
+            if (elem.regex.isNotEmpty()) {
                 if (elem.strings.isEmpty()) {
                     sb.append("\t: ").append(elem.regex[0])
                 } else {
@@ -144,13 +144,13 @@ class Grammar(val terminals: MutableMap<String, Terminal>, val nonTerminals: Mut
             sb.append(";\n")
         }
         sb.append("\nFirst:\n")
-        first.forEach { k, v ->
+        first.forEach { (k, v) ->
             if (nonTerminals.containsKey(k)) {
                 sb.append(k).append(" : ").append(v).append('\n')
             }
         }
         sb.append("\nFollow:\n")
-        follow.forEach { k, v -> sb.append(k).append(" : ").append(v).append('\n') }
+        follow.forEach { (k, v) -> sb.append(k).append(" : ").append(v).append('\n') }
         return sb.toString()
     }
 }
