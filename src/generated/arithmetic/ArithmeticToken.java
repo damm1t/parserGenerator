@@ -7,7 +7,6 @@ public enum ArithmeticToken {
 	TERM1, 
 	NUM, 
 	EPS, 
-	POW, 
 	END, 
 	MINUS
 }

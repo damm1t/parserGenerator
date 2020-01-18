@@ -11,23 +11,15 @@ add_[int acc] returns [int val]
 ;
 
 mul returns [int val]
-    : pow mul_[pow] { val = mul_; }
+    : term mul_[term] { val = mul_; }
 ;
 
 mul_[int acc] returns [int val]
-    : MUL pow { int res = acc * pow; } mul_[res] { val = mul_; }
-    | DIV pow { int res = acc / pow; } mul_[res] { val = mul_; }
+    : MUL term { int res = acc * term; } mul_[res] { val = mul_; }
+    | DIV term { int res = acc / term; } mul_[res] { val = mul_; }
     | EPS { val = acc; }
 ;
 
-pow returns [int val]
-    : term pow_ { val = (int)Math.pow(term, pow_); }
-;
-
-pow_ returns [int val]
-    : POW term pow_ { val = (int)Math.pow(term, pow_); }
-    | EPS { val = 1; }
-;
 
 term returns [int val]
     : NUM { val = Integer.parseInt(lex.getCurString()); }
@@ -45,9 +37,6 @@ MINUS
     ;
 DIV
     : '/'
-    ;
-POW
-    : '^'
     ;
 
 NUM : /[1-9][0-9]*|0/ ;

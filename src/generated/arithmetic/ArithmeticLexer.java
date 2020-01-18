@@ -74,10 +74,6 @@ class ArithmeticLexer {
 					nextChar();
 					curToken = ArithmeticToken.EPS;
 					break;
-				case "^":
-					nextChar();
-					curToken = ArithmeticToken.POW;
-					break;
 				case "END":
 					nextChar();
 					curToken = ArithmeticToken.END;
