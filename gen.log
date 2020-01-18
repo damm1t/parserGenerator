@@ -1,0 +1,70 @@
+Start: add
+
+NonTerms:
+add
+	: mul add_ 
+;
+add_
+	: ADD mul add_ 
+	| MINUS mul add_ 
+	| EPS 
+;
+pow_
+	: POW term pow_ 
+	| EPS 
+;
+mul
+	: pow mul_ 
+;
+mul_
+	: MUL pow mul_ 
+	| DIV pow mul_ 
+	| EPS 
+;
+pow
+	: term pow_ 
+;
+term
+	: NUM 
+	| TERM0 add TERM1 
+;
+
+Terms:
+DIV
+	: /;
+ADD
+	: +;
+TERM0
+	: (;
+MUL
+	: *;
+TERM1
+	: );
+NUM
+	: /[1-9][0-9]*|0/;
+EPS
+	: EPS;
+POW
+	: ^;
+END
+	: END;
+MINUS
+	: -;
+
+First:
+add : [TERM0, NUM]
+mul : [TERM0, NUM]
+mul_ : [DIV, MUL, EPS]
+add_ : [ADD, EPS, MINUS]
+pow_ : [POW, EPS]
+pow : [TERM0, NUM]
+term : [TERM0, NUM]
+
+Follow:
+add : [TERM1, END]
+add_ : [TERM1, END]
+pow_ : [DIV, ADD, MUL, TERM1, END, MINUS]
+mul : [ADD, TERM1, END, MINUS]
+mul_ : [ADD, TERM1, END, MINUS]
+pow : [DIV, ADD, MUL, TERM1, END, MINUS]
+term : [DIV, ADD, MUL, TERM1, POW, END, MINUS]

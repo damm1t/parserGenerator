@@ -20,14 +20,14 @@ public class Lab2Parser {
 	private void or() throws ParseException {
 
 		switch (lex.getCurToken()) {
-			case NUM: {
+			case NOT: {
 				xor();
 				
 				or_();
 				
 				break;
 			}
-			case NOT: {
+			case NUM: {
 				xor();
 				
 				or_();
@@ -48,23 +48,15 @@ public class Lab2Parser {
 	private void and_() throws ParseException {
 
 		switch (lex.getCurToken()) {
-			case RPAR: {
-
-				break;
-			}
 			case EPS: {
 
 				break;
 			}
-			case OR: {
+			case END: {
 
 				break;
 			}
 			case XOR: {
-
-				break;
-			}
-			case END: {
 
 				break;
 			}
@@ -79,6 +71,14 @@ public class Lab2Parser {
 				
 				break;
 			}
+			case RPAR: {
+
+				break;
+			}
+			case OR: {
+
+				break;
+			}
 			default:
 				throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
 		}
@@ -86,14 +86,14 @@ public class Lab2Parser {
 	private void and() throws ParseException {
 
 		switch (lex.getCurToken()) {
-			case NUM: {
+			case NOT: {
 				term();
 				
 				and_();
 				
 				break;
 			}
-			case NOT: {
+			case NUM: {
 				term();
 				
 				and_();
@@ -114,14 +114,14 @@ public class Lab2Parser {
 	private void xor() throws ParseException {
 
 		switch (lex.getCurToken()) {
-			case NUM: {
+			case NOT: {
 				and();
 				
 				xor_();
 				
 				break;
 			}
-			case NOT: {
+			case NUM: {
 				and();
 				
 				xor_();
@@ -142,13 +142,6 @@ public class Lab2Parser {
 	private void term() throws ParseException {
 
 		switch (lex.getCurToken()) {
-			case NUM: {
-
-				if (lex.getCurToken() != Lab2Token.NUM)
-					throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
-				lex.nextToken();
-				break;
-			}
 			case NOT: {
 
 				if (lex.getCurToken() != Lab2Token.NOT)
@@ -156,6 +149,13 @@ public class Lab2Parser {
 				lex.nextToken();
 				term();
 				
+				break;
+			}
+			case NUM: {
+
+				if (lex.getCurToken() != Lab2Token.NUM)
+					throw new IllegalArgumentException("Unexpected token " + lex.getCurString() + " at position: " + (lex.getCurPos() - 1));
+				lex.nextToken();
 				break;
 			}
 			case LPAR: {
@@ -178,15 +178,11 @@ public class Lab2Parser {
 	private void xor_() throws ParseException {
 
 		switch (lex.getCurToken()) {
-			case RPAR: {
-
-				break;
-			}
 			case EPS: {
 
 				break;
 			}
-			case OR: {
+			case END: {
 
 				break;
 			}
@@ -201,7 +197,11 @@ public class Lab2Parser {
 				
 				break;
 			}
-			case END: {
+			case RPAR: {
+
+				break;
+			}
+			case OR: {
 
 				break;
 			}
@@ -212,11 +212,15 @@ public class Lab2Parser {
 	private void or_() throws ParseException {
 
 		switch (lex.getCurToken()) {
-			case RPAR: {
+			case EPS: {
 
 				break;
 			}
-			case EPS: {
+			case END: {
+
+				break;
+			}
+			case RPAR: {
 
 				break;
 			}
@@ -229,10 +233,6 @@ public class Lab2Parser {
 				
 				or_();
 				
-				break;
-			}
-			case END: {
-
 				break;
 			}
 			default:

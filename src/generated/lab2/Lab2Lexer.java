@@ -103,7 +103,6 @@ class Lab2Lexer {
                 curToken = Lab2Token.END;
             }
         }
-        System.out.println(curToken.toString());
     }
     // some useless getters
                 

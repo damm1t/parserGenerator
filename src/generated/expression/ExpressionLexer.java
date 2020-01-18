@@ -1,17 +1,17 @@
-package generated.arithmetic;
+package generated.expression;
 // imports
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 
 // fields
-class ArithmeticLexer {
+class ExpressionLexer {
     private InputStream input;
     private int curChar, curPos;
     private String curString;
-    private ArithmeticToken curToken;
+    private ExpressionToken curToken;
     // constructor
-    ArithmeticLexer (InputStream input) throws ParseException {
+    ExpressionLexer (InputStream input) throws ParseException {
         this.input = input;
         curPos = 0;
         nextChar();
@@ -39,64 +39,75 @@ class ArithmeticLexer {
         }
         // if EOF found return END token
         if (curChar == -1) {
-            curToken = ArithmeticToken.END;
+            curToken = ExpressionToken.END;
             return;
         }
         
         curString = "";
-        curToken = ArithmeticToken.END;
-        ArithmeticToken prev = ArithmeticToken.END;
+        curToken = ExpressionToken.END;
+        ExpressionToken prev = ExpressionToken.END;
         // greedily reading forward to be able to match string tokens
-        while (curToken == ArithmeticToken.END) {
+        while (curToken == ExpressionToken.END) {
             curString = curString.concat(Character.toString((char)curChar));
             switch (curString) {
-				case "/":
-					nextChar();
-					curToken = ArithmeticToken.DIV;
-					break;
 				case "+":
 					nextChar();
-					curToken = ArithmeticToken.ADD;
+					curToken = ExpressionToken.ADD;
 					break;
-				case "(":
+				case ";":
 					nextChar();
-					curToken = ArithmeticToken.TERM0;
+					curToken = ExpressionToken.TERM0;
 					break;
 				case "*":
 					nextChar();
-					curToken = ArithmeticToken.MUL;
+					curToken = ExpressionToken.MUL;
+					break;
+				case "=":
+					nextChar();
+					curToken = ExpressionToken.EQUAL;
+					break;
+				case "(":
+					nextChar();
+					curToken = ExpressionToken.TERM2;
 					break;
 				case ")":
 					nextChar();
-					curToken = ArithmeticToken.TERM1;
+					curToken = ExpressionToken.TERM3;
 					break;
 				case "EPS":
 					nextChar();
-					curToken = ArithmeticToken.EPS;
-					break;
-				case "^":
-					nextChar();
-					curToken = ArithmeticToken.POW;
-					break;
-				case "END":
-					nextChar();
-					curToken = ArithmeticToken.END;
+					curToken = ExpressionToken.EPS;
 					break;
 				case "-":
 					nextChar();
-					curToken = ArithmeticToken.MINUS;
+					curToken = ExpressionToken.MINUS;
+					break;
+				case "/":
+					nextChar();
+					curToken = ExpressionToken.DIV;
+					break;
+				case "^":
+					nextChar();
+					curToken = ExpressionToken.POW;
+					break;
+				case "END":
+					nextChar();
+					curToken = ExpressionToken.END;
 					break;
 				default:
-					if (curString.matches("[1-9][0-9]*|0")) {
+					if (curString.matches("[a-z]+")) {
 						nextChar();
-						curToken = ArithmeticToken.NUM;
-					} else if ((curChar == -1 || isBlank(curChar)) && prev == ArithmeticToken.END) {
+						curToken = ExpressionToken.TERM1;
+					} else if (curString.matches("[1-9][0-9]*|0")) {
+						nextChar();
+						curToken = ExpressionToken.NUM;
+					} else if ((curChar == -1 || isBlank(curChar)) && prev == ExpressionToken.END) {
                         throw new ParseException("Illegal character " + curString.charAt(0) + " at position ", curPos - curString.length());
                     }
             }
             // confusing schemes to check if we need to continue reading
-            if (curToken == ArithmeticToken.END) {
-                if (prev != ArithmeticToken.END) {
+            if (curToken == ExpressionToken.END) {
+                if (prev != ExpressionToken.END) {
                     curString = curString.substring(0, curString.length() - 1);
                     curToken = prev;
                 } else {
@@ -104,13 +115,13 @@ class ArithmeticLexer {
                 }
             } else {
                 prev = curToken;
-                curToken = ArithmeticToken.END;
+                curToken = ExpressionToken.END;
             }
         }
     }
     // some useless getters
                 
-    ArithmeticToken getCurToken() {
+    ExpressionToken getCurToken() {
         return curToken;
     }
 
