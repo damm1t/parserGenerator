@@ -1,30 +1,38 @@
 grammar Arithmetic
 
-add returns [int val]
+add returns [generated.arithmetic.Complex val]
     : mul add_[mul] { val = add_; }
 ;
 
-add_[int acc] returns [int val]
-    : ADD mul { int res = acc + mul; } add_[res] { val = add_; }
-    | MINUS mul { int res = acc - mul; } add_[res] { val = add_; }
+add_[generated.arithmetic.Complex acc] returns [generated.arithmetic.Complex val]
+    : ADD mul { generated.arithmetic.Complex res = generated.arithmetic.Complex.cadd(acc, mul); } add_[res] { val = add_; }
+    | MINUS mul { generated.arithmetic.Complex res = generated.arithmetic.Complex.csub(acc, mul); } add_[res] { val = add_; }
     | EPS { val = acc; }
 ;
 
-mul returns [int val]
+mul returns [generated.arithmetic.Complex val]
     : term mul_[term] { val = mul_; }
 ;
 
-mul_[int acc] returns [int val]
-    : MUL term { int res = acc * term; } mul_[res] { val = mul_; }
-    | DIV term { int res = acc / term; } mul_[res] { val = mul_; }
+mul_[generated.arithmetic.Complex acc] returns [generated.arithmetic.Complex val]
+    : MUL term { generated.arithmetic.Complex res = generated.arithmetic.Complex.cmul(acc, term); } mul_[res] { val = mul_; }
+    | DIV term { generated.arithmetic.Complex res = generated.arithmetic.Complex.cdiv(acc, term); } mul_[res] { val = mul_; }
     | EPS { val = acc; }
 ;
 
 
-term returns [int val]
-    : NUM { val = Integer.parseInt(lex.getCurString()); }
+term returns [generated.arithmetic.Complex val]
+    : '{' num1 ';' num2 '}' {val = new generated.arithmetic.Complex(num1, num2);}
     | '(' add ')' { val = add; }
 ;
+
+num1 returns [int val]
+    : NUM { val = Integer.parseInt(lex.getCurString()); }
+    ;
+
+num2 returns [int val]
+    : NUM { val = Integer.parseInt(lex.getCurString()); }
+    ;
 
 MUL
     : '*'

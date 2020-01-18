@@ -17,9 +17,15 @@ mul_
 	| DIV term mul_ 
 	| EPS 
 ;
-term
+num1
 	: NUM 
-	| TERM0 add TERM1 
+;
+term
+	: TERM0 num1 TERM1 num2 TERM2 
+	| TERM3 add TERM4 
+;
+num2
+	: NUM 
 ;
 
 Terms:
@@ -28,13 +34,19 @@ DIV
 ADD
 	: +;
 TERM0
-	: (;
+	: {;
 MUL
 	: *;
 TERM1
-	: );
+	: ;;
+TERM2
+	: };
+TERM3
+	: (;
 NUM
 	: /[1-9][0-9]*|0/;
+TERM4
+	: );
 EPS
 	: EPS;
 END
@@ -43,15 +55,19 @@ MINUS
 	: -;
 
 First:
-add : [TERM0, NUM]
-mul : [TERM0, NUM]
+add : [TERM0, TERM3]
+mul : [TERM0, TERM3]
 mul_ : [DIV, MUL, EPS]
 add_ : [ADD, EPS, MINUS]
-term : [TERM0, NUM]
+num1 : [NUM]
+term : [TERM0, TERM3]
+num2 : [NUM]
 
 Follow:
-add : [TERM1, END]
-add_ : [TERM1, END]
-mul : [ADD, TERM1, END, MINUS]
-mul_ : [ADD, TERM1, END, MINUS]
-term : [DIV, ADD, MUL, TERM1, END, MINUS]
+add : [TERM4, END]
+add_ : [TERM4, END]
+mul : [ADD, TERM4, END, MINUS]
+mul_ : [ADD, TERM4, END, MINUS]
+num1 : [TERM1]
+term : [DIV, ADD, MUL, TERM4, END, MINUS]
+num2 : [TERM2]
